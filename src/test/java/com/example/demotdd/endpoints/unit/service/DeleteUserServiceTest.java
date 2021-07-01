@@ -1,0 +1,49 @@
+package com.example.demotdd.endpoints.unit.service;
+
+import com.example.demotdd.domain.user.User;
+import com.example.demotdd.domain.user.UserRepository;
+import com.example.demotdd.endpoints.delete.DeleteUserService;
+import com.example.demotdd.endpoints.detail.UserNotFoundException;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
+import java.util.Optional;
+
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@RunWith(MockitoJUnitRunner.class)
+public class DeleteUserServiceTest {
+    @Mock
+    private UserRepository userRepository;
+
+    @InjectMocks
+    private DeleteUserService service;
+
+    @Test
+    public void whenGivenId_shouldDeleteUser_ifFound(){
+        User user = new User();
+        user.setName("Toto");
+        user.setId(89L);
+
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+
+        service.deleteUser(user.getId());
+        verify(userRepository).deleteById(user.getId());
+    }
+
+    @Test(expected = UserNotFoundException.class)
+    public void should_throw_exception_when_user_doesnt_exist(){
+        User user = new User();
+        user.setName("Toto");
+        user.setId(89L);
+
+        given(userRepository.findById(anyLong())).willReturn(Optional.ofNullable(null));
+        service.deleteUser(user.getId());
+    }
+}
